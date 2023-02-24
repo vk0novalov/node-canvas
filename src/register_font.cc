@@ -220,7 +220,7 @@ u8ToWide(const char* str) {
   return wpBufWString;
 }
 
-static unsigned long 
+static unsigned long
 stream_read_func(FT_Stream stream, unsigned long offset, unsigned char* buffer, unsigned long count){
   HANDLE hFile = reinterpret_cast<HANDLE>(stream->descriptor.pointer);
   DWORD numberOfBytesRead;
@@ -234,7 +234,7 @@ stream_read_func(FT_Stream stream, unsigned long offset, unsigned char* buffer, 
   return numberOfBytesRead;
 };
 
-static void 
+static void
 stream_close_func(FT_Stream stream){
   HANDLE hFile = reinterpret_cast<HANDLE>(stream->descriptor.pointer);
   CloseHandle(hFile);
@@ -251,7 +251,7 @@ get_pango_font_description(unsigned char* filepath) {
   FT_Face face;
   PangoFontDescription *desc = pango_font_description_new();
 #ifdef _WIN32
-  // FT_New_Face use fopen. 
+  // FT_New_Face use fopen.
   // Unable to find the file when supplied the multibyte string path on the Windows platform and throw error "Could not parse font file".
   // This workaround fixes this by reading the font file uses win32 wide character API.
   std::unique_ptr<wchar_t[]> wFilepath = u8ToWide((char*)filepath);
@@ -286,7 +286,7 @@ get_pango_font_description(unsigned char* filepath) {
   stream.close = stream_close_func;
   args.stream = &stream;
   if (
-    !FT_Init_FreeType(&library) && 
+    !FT_Init_FreeType(&library) &&
     !FT_Open_Face(library, &args, 0, &face)) {
 #else
   if (!FT_Init_FreeType(&library) && !FT_New_Face(library, (const char*)filepath, 0, &face)) {
@@ -341,7 +341,7 @@ fc_font_map_substitute_hook(FcPattern *pat, gpointer data) {
 bool
 register_font(unsigned char *filepath) {
   bool success;
-  
+
   #ifdef __APPLE__
   CFURLRef filepathUrl = CFURLCreateFromFileSystemRepresentation(NULL, filepath, strlen((char*)filepath), false);
   success = CTFontManagerRegisterFontsForURL(filepathUrl, kCTFontManagerScopeProcess, NULL);
@@ -381,7 +381,7 @@ register_font(unsigned char *filepath) {
 bool
 deregister_font(unsigned char *filepath) {
   bool success;
-  
+
   #ifdef __APPLE__
   CFURLRef filepathUrl = CFURLCreateFromFileSystemRepresentation(NULL, filepath, strlen((char*)filepath), false);
   success = CTFontManagerUnregisterFontsForURL(filepathUrl, kCTFontManagerScopeProcess, NULL);
@@ -405,4 +405,11 @@ deregister_font(unsigned char *filepath) {
   pango_cairo_font_map_set_default(NULL);
 
   return true;
+}
+
+void
+refresh_fonts() {
+  #if !defined(__APPLE__) && !defined(_WIN32)
+  pango_fc_font_map_config_changed(PANGO_FC_FONT_MAP(pango_cairo_font_map_get_default()));
+  #endif
 }

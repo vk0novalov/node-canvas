@@ -86,6 +86,7 @@ Canvas::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
   // Class methods
   Nan::SetMethod(ctor, "_registerFont", RegisterFont);
   Nan::SetMethod(ctor, "_deregisterAllFonts", DeregisterAllFonts);
+  Nan::SetMethod(ctor, "_refreshFonts", RefreshFonts);
 
   Local<Context> ctx = Nan::GetCurrentContext();
   Nan::Set(target,
@@ -794,6 +795,10 @@ NAN_METHOD(Canvas::DeregisterAllFonts) {
 
   font_face_list.clear();
   if (!success) Nan::ThrowError("Could not deregister one or more fonts");
+}
+
+NAN_METHOD(Canvas::RefreshFonts) {
+  refresh_fonts();
 }
 
 /*

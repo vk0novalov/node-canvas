@@ -66,6 +66,7 @@ class Canvas: public Nan::ObjectWrap {
     static NAN_METHOD(StreamJPEGSync);
     static NAN_METHOD(RegisterFont);
     static NAN_METHOD(DeregisterAllFonts);
+    static NAN_METHOD(RefreshFonts);
     static v8::Local<v8::Value> Error(cairo_status_t status);
     static void ToPngBufferAsync(uv_work_t *req);
     static void ToJpegBufferAsync(uv_work_t *req);
